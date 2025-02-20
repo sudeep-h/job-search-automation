@@ -1,11 +1,16 @@
 import React from "react";
+import Sidebar from '../../components/SideBar';
+
 
 const Dashboard=()=>{
     return(
-        <div className="text-center p-10">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="mt-2">Track your job applications here.</p>
-        </div>
+        <div className="d-flex">
+            <Sidebar />
+      <div className="container-fluid p-4">
+        <h2>Dashboard</h2>
+        <p>Track your job applications and manage your profile.</p>
+      </div>
+    </div>
     )
 }
 

@@ -1,35 +1,47 @@
-import React,{useState} from "react";
-import { Form, Button, Container, Card } from "react-bootstrap";
+import React, { useState } from "react";
 import { Link,useNavigate } from "react-router-dom";
+import { Form, Button, Container, Card, Alert } from "react-bootstrap";
 import authServices from "../../services/authServices";
-import { toast } from "react-toastify";
-import "react-toastify/ReactToastify.css";
+import GoogleLoginButton from "../../components/GoogleLoginButton";
 
-const Login=()=>{
-    const [email,setEmail]=useState("");
-    const [password,setPassword] = useState("");
-    const navigate=useNavigate();
+const LoginPage = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const handleSubmit=async (e)=>{
-        e.preventDefault();
-        console.log("Logging in with email,password");
-        try {
-            await authServices.login({ email, password });
-            toast.success("Login successful!");
-            navigate("/dashboard");
-          } catch (error) {
-            toast.error(error.response?.data?.message || "Login failed!");
-          }
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    const response = await authServices.login({ email, password });
+
+    if (response.success) {
+      navigate("/dashboard");
+    } else {
+      setError(response.message);
     }
+  };
 
+  const handleOAuthSuccess = async (tokenOrCode) => {
+    const response = await authServices.oauthLogin(tokenOrCode);
 
-    return(
-        <Container className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
+    if (response.success) {
+      navigate("/dashboard");
+    } else {
+      setError(response.message);
+    }
+  };
+
+  return (
+    <Container className="d-flex justify-content-center align-items-center" style={{ height: "100vh" }}>
         <Card style={{ width: "400px" }} className="p-4 shadow">
             <h3 className="text-center mb-4">Login</h3>
-            <Form onSubmit={handleSubmit}>
+            {error && <Alert variant="danger">{error}</Alert>}
+            <Form onSubmit={handleLogin}>
+
             <Form.Group className="mb-3" controlId="formBasicEmail">
-                <Form.Label>Email address</Form.Label>
+                <Form.Label>Email: </Form.Label>
                 <Form.Control
                 type="email"
                 placeholder="Enter email"
@@ -40,7 +52,7 @@ const Login=()=>{
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
-                <Form.Label>Password</Form.Label>
+                <Form.Label>Password: </Form.Label>
                 <Form.Control
                 type="password"
                 value={password}
@@ -56,9 +68,15 @@ const Login=()=>{
             <div className="text-center mt-3">
                 Don't have an account? <Link to="/register">Register</Link>
             </div>
+
+            <div className="mt-3">
+                <p style={{ textAlign: "center", marginBottom: "10px" ,marginTop:0}}>or</p>
+                <GoogleLoginButton onSuccess={handleOAuthSuccess} />
+            </div>
+
         </Card>
         </Container>
-    )
-}
+  );
+};
 
-export default Login;
+export default LoginPage;
